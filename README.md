@@ -1,6 +1,6 @@
 # JSON Resume to LinkedIn Syncer
 
-Janky solution to syncing a JSON Resume profile to LinkedIn.
+Janky solution to sync a [JSON Resume](https://jsonresume.org) profile to LinkedIn.
 
 > [!CAUTION]
 > This might delete things from your LinkedIn profile. You should make a backup first. Use at your own risk.
