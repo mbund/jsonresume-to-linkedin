@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jsonresume-to-linkedin"
+version = "2024.2.1"
+dependencies = ["linkedin_api"]
+requires-python = ">=3.8"
+authors = [{ name = "Mark Bundschuh", email = "mark@mbund.dev" }]
+maintainers = [{ name = "Mark Bundschuh", email = "mark@mbund.dev" }]
+description = "Sync a JSON Resume profile to LinkedIn."
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["jsonresume", "linkedin"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/mbund/jsonresume-to-linkedin"
+Documentation = "https://github.com/mbund/jsonresume-to-linkedin"
+Repository = "https://github.com/mbund/jsonresume-to-linkedin"
+"Bug Tracker" = "https://github.com/mbund/jsonresume-to-linkedin"
+Changelog = "https://github.com/mbund/jsonresume-to-linkedin"
+
+[project.scripts]
+jsonresume-to-linkedin = "main:main"

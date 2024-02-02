@@ -2,6 +2,7 @@ import os
 import json
 from linkedin_api import Linkedin
 
+
 USERNAME = os.environ.get("LINKEDIN_USERNAME")
 PASSWORD = os.environ.get("LINKEDIN_PASSWORD")
 
@@ -174,10 +175,14 @@ def update_from_jsonresume(profile, resume):
         print(f"Deleted {li_experience['companyName']} {li_experience['title']}")
 
 
-if __name__ == "__main__":
+def main():
     profile = api.get_profile(urn_id=user_urn_id)
     print("Got self profile")
 
     with open("resume.json", "r") as f:
         resume = json.load(f)
         update_from_jsonresume(profile, resume)
+
+
+if __name__ == "__main__":
+    main()
