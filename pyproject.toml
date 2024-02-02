@@ -1,29 +1,18 @@
-[build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "jsonresume-to-linkedin"
-version = "2024.2.1"
-dependencies = ["linkedin_api"]
-requires-python = ">=3.8"
-authors = [{ name = "Mark Bundschuh", email = "mark@mbund.dev" }]
-maintainers = [{ name = "Mark Bundschuh", email = "mark@mbund.dev" }]
+version = "0.1.0"
 description = "Sync a JSON Resume profile to LinkedIn."
+authors = ["Mark Bundschuh <mark@mbund.dev>"]
+license = "GPLv3"
 readme = "README.md"
-license = { file = "LICENSE" }
-keywords = ["jsonresume", "linkedin"]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3",
-]
 
-[project.urls]
-Homepage = "https://github.com/mbund/jsonresume-to-linkedin"
-Documentation = "https://github.com/mbund/jsonresume-to-linkedin"
-Repository = "https://github.com/mbund/jsonresume-to-linkedin"
-"Bug Tracker" = "https://github.com/mbund/jsonresume-to-linkedin"
-Changelog = "https://github.com/mbund/jsonresume-to-linkedin"
+[tool.poetry.dependencies]
+python = "^3.10"
+linkedin-api = { git = "https://github.com/tomquirk/linkedin-api.git" }
 
-[project.scripts]
-jsonresume-to-linkedin = "main:main"
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+jsonresume-to-linkedin = "jsonresume_to_linkedin:main"

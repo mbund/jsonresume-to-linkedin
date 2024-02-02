@@ -26,6 +26,7 @@
     in {
       devShells.default = pkgs.mkShell {
         packages = with pkgs; [
+          poetry
           (python3.withPackages (ps:
             with ps; [
               requests
