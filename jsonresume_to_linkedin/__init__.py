@@ -15,6 +15,26 @@ if not user_profile:
 user_urn = user_profile["miniProfile"]["dashEntityUrn"]
 user_urn_id = user_urn.split(":")[-1]
 
+# add a link/featured item
+# api._post(
+#     "/graphql?action=execute&queryId=voyagerIdentityDashProfileTreasuryMedia.937a6ea5945f9fb6bbeb31e78d3ea85f",
+#     json={
+#         "variables": {
+#             "entities": [
+#                 {
+#                     "data": {"Url": "https://mbund.dev/about/"},
+#                     "multiLocaleDescription": [{"key": "en_US", "value": "desc2"}],
+#                     "multiLocaleTitle": [
+#                         {"key": "en_US", "value": "About Me | Mark's Blog2"}
+#                     ],
+#                 }
+#             ],
+#             "sectionUrn": "urn:li:fsd_profile:ACoAAEHkM3oBc-Pt-2pasLeYvJD3eoRDRw7BqgU",
+#         },
+#         "queryId": "voyagerIdentityDashProfileTreasuryMedia.937a6ea5945f9fb6bbeb31e78d3ea85f",
+#     },
+# )
+
 
 def submit_changes(changes):
     body = {
@@ -35,6 +55,7 @@ def make_change(urn, values):
 
 
 def update_from_jsonresume(profile, resume):
+    # Summary
     about = resume["basics"]["summary"]
     if profile["summary"] != about:
         submit_changes(
@@ -47,6 +68,7 @@ def update_from_jsonresume(profile, resume):
         )
         print(f"Updated {about}")
 
+    # Experiences
     experiences = [
         (
             work,
@@ -73,9 +95,7 @@ def update_from_jsonresume(profile, resume):
         description = ""
         if "summary" in work:
             description = work["summary"] + "\n\n"
-
         description += "\n".join([f"- {highlight}" for highlight in work["highlights"]])
-
         if not li_experience or description != li_experience["description"]:
             changes.append(
                 make_change(
@@ -147,9 +167,9 @@ def update_from_jsonresume(profile, resume):
         if changes:
             submit_changes(changes)
             if li_experience:
-                print(f"Updated {work['name']} {work['position']}")
+                print(f"Updated experience {work['name']} {work['position']}")
             else:
-                print(f"Created {work['name']} {work['position']}")
+                print(f"Created experience {work['name']} {work['position']}")
 
     to_be_deleted_li_experiences = [
         experience
@@ -172,7 +192,104 @@ def update_from_jsonresume(profile, resume):
             },
         )
 
-        print(f"Deleted {li_experience['companyName']} {li_experience['title']}")
+        print(
+            f"Deleted experience {li_experience['companyName']} {li_experience['title']}"
+        )
+
+    # Skills
+    skills = sum([skill["keywords"] for skill in resume["skills"]], [])
+    linkedin_skills = [
+        skill["name"] for skill in api.get_profile_skills(urn_id=user_urn_id)
+    ]
+    linkedin_skills = [skill.split(" (")[0] for skill in linkedin_skills]
+    skills = [skill for skill in skills if skill not in linkedin_skills]
+    for skill in skills:
+        submit_changes(
+            [
+                make_change(
+                    f"urn:li:fsd_profileEditFormElement:(SKILL_AND_ASSOCIATION,urn:li:fsd_skill:({user_urn_id},-1),/name)",
+                    [{"entityInputValue": {"inputEntityName": skill}}],
+                )
+            ]
+        )
+        print(f"Added skill {skill}")
+
+    # Projects
+    projects = [
+        (
+            project,
+            next(
+                (
+                    linkedin_project
+                    for linkedin_project in profile["projects"]
+                    if linkedin_project["title"] == project["name"]
+                ),
+                None,
+            ),
+        )
+        for project in resume["projects"]
+    ]
+    for project, linkedin_project in projects:
+        if linkedin_project:
+            project_urn = f"{user_urn_id},{linkedin_project['members'][0]['entityUrn'].split(',')[1]}"
+        else:
+            project_urn = f"{user_urn_id},-1"
+
+        changes = []
+
+        if not linkedin_project:  # or linkedin_project["title"] != project["name"]
+            changes.append(
+                make_change(
+                    f"urn:li:fsd_profileEditFormElement:(PROJECT,urn:li:fsd_profileProject:({project_urn}),/title)",
+                    [{"textInputValue": project["name"]}],
+                )
+            )
+
+        description = "\n".join(
+            [f"- {highlight}" for highlight in project["highlights"]]
+        )
+        if not linkedin_project or linkedin_project["description"] != description:
+            changes.append(
+                make_change(
+                    f"urn:li:fsd_profileEditFormElement:(PROJECT,urn:li:fsd_profileProject:({project_urn}),/description)",
+                    [{"textInputValue": description}],
+                )
+            )
+
+        dateRange = {
+            "startDate": {
+                "month": int(project["startDate"].split("-")[1]),
+                "year": int(project["startDate"].split("-")[0]),
+            },
+        }
+        if "endDate" in project:
+            dateRange["endDate"] = {
+                "month": int(project["endDate"].split("-")[1]),
+                "year": int(project["endDate"].split("-")[0]),
+            }
+        if (
+            not linkedin_project
+            or "timePeriod" not in linkedin_project
+            or dateRange != linkedin_project["timePeriod"]
+        ):
+            dateRangeInputValue = {
+                "start": dateRange["startDate"],
+            }
+            if "endDate" in dateRange:
+                dateRangeInputValue["end"] = dateRange["endDate"]
+            changes.append(
+                make_change(
+                    f"urn:li:fsd_profileEditFormElement:(PROJECT,urn:li:fsd_profileProject:({project_urn}),/dateRange)",
+                    [{"dateRangeInputValue": dateRangeInputValue}],
+                )
+            )
+
+        if changes:
+            submit_changes(changes)
+            if linkedin_project:
+                print(f"Updated project {project['name']}")
+            else:
+                print(f"Created project {project['name']}")
 
 
 def main():
